@@ -1,5 +1,7 @@
 TripSage - Your Smart Itinerary Planner
+
 Overview
+
 TripSage is an innovative, AI-powered itinerary planner that simplifies and enhances the travel planning experience. Designed to cater to adventure enthusiasts and casual travelers alike, TripSage provides personalized itineraries, integrates interactive maps, and offers a seamless, user-friendly interface. Whether you're into river rafting, trekking, scuba diving, or simply exploring new places, TripSage has the tools you need.
 
 Key Features
