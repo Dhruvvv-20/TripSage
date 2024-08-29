@@ -1,0 +1,118 @@
+:root {
+    --font-family--poppins: Poppins, sans-serif;
+    --font-family--kumbh-sans: "Kumbh Sans", sans-serif;
+    --color--white: white;
+    --color--black: #000;
+    --color--green: #63ab45;
+    --color--light-black: #1c231f;
+    --color--gray: #4d4d4d;
+    --color--orange: #f7921e;
+    --color--light-green: #d9ead2;
+    --color--black-700: #181818;
+}
+
+body {
+    font-family: var(--font-family--poppins);
+    background-color: var(--color--light-green);
+    color: var(--color--black-700);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+header {
+    background-color: var(--color--white);
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    font-family: var(--font-family--kumbh-sans);
+    font-size: 2.5rem;
+    color: var(--color--green);
+    margin: 0;
+    animation: fadeInDown 1s ease-in-out;
+}
+
+section#itinerary {
+    background-color: var(--color--white);
+    color: var(--color--black-700);
+    padding: 30px;
+    margin: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 800px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 1s ease-in-out forwards;
+}
+
+section#itinerary h2 {
+    font-family: var(--font-family--kumbh-sans);
+    color: var(--color--orange);
+    margin-bottom: 10px;
+    font-size: 1.8rem;
+    animation: fadeIn 1.2s ease-in-out;
+}
+
+section#itinerary p {
+    font-family: var(--font-family--poppins);
+    color: var(--color--gray);
+    margin-bottom: 15px;
+    line-height: 1.6;
+    animation: fadeIn 1.4s ease-in-out;
+}
+
+footer {
+    margin-top: auto;
+    background-color: var(--color--white);
+    padding: 10px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+footer p {
+    font-family: var(--font-family--kumbh-sans);
+    color: var(--color--green);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}

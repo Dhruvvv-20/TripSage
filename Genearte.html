@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Itinerary Planner</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .form-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            width: 90%;
+            max-width: 500px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: #2E8B57;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        label {
+            margin-bottom: 5px;
+            display: block;
+            font-weight: 500;
+        }
+
+        input, button {
+            margin: 10px 0;
+            padding: 12px;
+            width: calc(100% - 24px);
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #2E8B57;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background-color: #256C45;
+        }
+
+        .loading-container {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: white;
+            font-size: 16px;
+            display: none;
+            z-index: 2;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            max-width: 300px;
+            text-align: center;
+        }
+
+        .itinerary-container {
+            position: absolute;
+            top: 10%;
+            bottom: 10%;
+            left: 10px;
+            right: 10px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            overflow-y: auto; /* Enables vertical scrolling */
+            display: none;
+            z-index: 3;
+            margin: 10px;
+            margin-left: 10%;
+            margin-right: 10%;
+        }
+
+        .itinerary-container h2 {
+            margin-top: 0;
+            color: #2E8B57;
+            text-align: center;
+        }
+
+        .itinerary-content {
+            line-height: 1.6;
+            font-size: 16px;
+            color: #333;
+
+        }
+
+        .minimize-button {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background-color: #2E8B57;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .minimize-button:hover {
+            background-color: #256C45;
+        }
+
+        .minimized-tab {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: #2E8B57;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+            z-index: 4;
+            font-weight: 500;
+        }
+
+        .minimized-tab:hover {
+            background-color: #256C45;
+        }
+        .itinerary-container h2 {
+    font-size: 24px;
+    color: #4d4d4d;
+    margin-bottom: 15px;
+}
+
+.itinerary-container p {
+    font-size: 16px;
+    color: #181818;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+/* Add more styles to match your design */
+
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <div class="form-container" id="form-container">
+        <h1>Plan Your Trip</h1>
+        <form id="itinerary-form">
+            <label for="people">Number of People:</label>
+            <input type="number" id="people" name="people" required>
+
+            <label for="place">Destination:</label>
+            <input type="text" id="place" name="place" required>
+
+            <label for="days">Number of Days:</label>
+            <input type="number" id="days" name="days" required>
+
+            <label for="budget">Budget (in rupees):</label>
+            <input type="number" id="budget" name="budget" required>
+
+            <button id="myButton" type="button">Generate Itinerary</button>
+        </form>
+    </div>
+
+    <div class="loading-container" id="loading-container">
+        Generating your personalized itinerary...
+    </div>
+
+    <div class="itinerary-container" id="itinerary-container">
+        <h2>Your Personalized Itinerary</h2>
+        <button class="minimize-button" onclick="toggleItinerary()">Minimize</button>
+        <div id="result" class="itinerary-content"></div>
+    </div>
+
+    <div class="minimized-tab" id="minimized-tab" onclick="toggleItinerary()">View Itinerary</div>
+
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <script>
+        mapboxgl.accessToken = '';
+
+        // Initialize the map
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/outdoors-v12',
+            center: [78.9629, 20.5937], 
+            zoom: 9
+        });
+
+        document.getElementById('myButton').addEventListener('click', function () {
+            flyToLocation();
+            document.getElementById('form-container').style.display = 'none'; 
+            document.getElementById('loading-container').style.display = 'block'; 
+            generateItinerary();
+        });
+
+        async function getCoordinates(location) {
+            const apiUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?access_token=${mapboxgl.accessToken}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                if (data.features && data.features.length > 0) {
+                    const [lng, lat] = data.features[0].geometry.coordinates;
+                    return { lng, lat };
+                } else {
+                    throw new Error(`Geocoding failed for ${location}`);
+                }
+            } catch (error) {
+                console.error(error);
+                return null;
+            }
+        }
+
+        async function flyToLocation() {
+            const place = document.getElementById('place').value;
+
+            const coordinates = await getCoordinates(place);
+            if (coordinates) {
+                new mapboxgl.Marker({ color: 'red' })
+                    .setLngLat([coordinates.lng, coordinates.lat])
+                    .addTo(map);
+
+                map.flyTo({
+                    center: [coordinates.lng, coordinates.lat],
+                    essential: true,
+                    zoom: 12.8
+                });
+            }
+
+            navigator.geolocation.getCurrentPosition(position => {
+                const { latitude, longitude } = position.coords;
+                new mapboxgl.Marker({ color: 'blue' })
+                    .setLngLat([longitude, latitude])
+                    .addTo(map);
+            });
+        }
+
+        const openai_apiKey = '';
+        const apiUrl = '';
+
+        async function generateItinerary() {
+            const form = document.getElementById('itinerary-form');
+            const formData = new FormData(form);
+            const data = {
+                people: formData.get('people'),
+                place: formData.get('place'),
+                days: formData.get('days'),
+                budget: formData.get('budget')
+            };
+
+            try {
+    const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${openai_apiKey}`
+        },
+        body: JSON.stringify({
+            model: 'gpt-3.5-turbo',
+            messages: [{
+                role: 'user',
+                content: `Create a detailed itinerary for ${data.people} people to visit ${data.place} for ${data.days} days with a budget of ${data.budget} rupees.`
+            }],
+            temperature: 0.7,
+        })
+    });
+
+    const result = await response.json();
+    const itineraryContent = result.choices[0].message.content;
+
+    // Improved formatting: splitting by 'Day' keyword or another separator
+    const days = itineraryContent.split(/(Day \d+:)/g).filter(section => section.trim() !== '');
+
+    let formattedContent = '';
+    for (let i = 0; i < days.length; i++) {
+        if (days[i].includes('Day')) {
+            // Add the day header
+            formattedContent += `<h2>${days[i]}</h2>`;
+        } else {
+            // Add the details for that day
+            formattedContent += `<p>${days[i].replace(/\n/g, '<br>')}</p>`;
+        }
+    }
+
+    document.getElementById('result').innerHTML = formattedContent;
+    document.getElementById('loading-container').style.display = 'none';
+    document.getElementById('itinerary-container').style.display = 'block';
+    document.getElementById('minimized-tab').style.display = 'block';
+} catch (error) {
+    console.error('Error:', error);
+    document.getElementById('loading-container').style.display = 'none';
+    alert('An error occurred while generating the itinerary. Please try again.');
+}
+
+
+        }
+
+        function toggleItinerary() {
+            const itineraryContainer = document.getElementById('itinerary-container');
+            const minimizedTab = document.getElementById('minimized-tab');
+            if (itineraryContainer.style.display === 'block') {
+                itineraryContainer.style.display = 'none';
+                minimizedTab.style.display = 'block';
+            } else {
+                itineraryContainer.style.display = 'block';
+                minimizedTab.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+
+</html>
